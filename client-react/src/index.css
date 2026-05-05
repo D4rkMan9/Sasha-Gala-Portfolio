@@ -16,7 +16,20 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  
+
+  /* Customizable typography variables */
+  --font-family: "Inter", sans-serif;
+  --base-font-size: 16px;
+  --base-font-weight: 400;
+  --base-line-height: 1.5;
+  --base-letter-spacing: 0;
+
+  /* Element-specific typography */
+  --home-projects-font-size: 8vh;
+  --home-projects-font-weight: 300;
+  --nav-links-font-size: 16px;
+  --nav-links-font-weight: 500;
+  --footer-font-size: large;
 }
 
 * {
@@ -31,6 +44,11 @@ body {
   overflow-x: hidden;
   width: 100%;
   min-height: 100vh;
+  font-family: var(--font-family);
+  font-size: var(--base-font-size);
+  font-weight: var(--base-font-weight);
+  line-height: var(--base-line-height);
+  letter-spacing: var(--base-letter-spacing);
 }
 
 #root {

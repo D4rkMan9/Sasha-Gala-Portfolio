@@ -7,10 +7,11 @@ import { About } from './pages/About'
 import { Login } from './pages/Login'
 import { Admin } from './pages/Admin'
 import { ProjectEditor } from './pages/ProjectEditor'
+import { TypographyProvider } from './componentes/TypographyProvider'
 
 function App() {
   return(
-    <>
+    <TypographyProvider>
       <Router>
         <Routes>
           <Route path="/" element={<Home />} />
@@ -23,7 +24,7 @@ function App() {
           <Route path="/admin/edit/:id" element={<ProjectEditor />} />
         </Routes>
       </Router>
-    </>
+    </TypographyProvider>
   )
 }
 

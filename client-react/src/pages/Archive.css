@@ -7,3 +7,24 @@
   flex-shrink: 0;
   padding: 3%;
 }
+
+.carrousel img {
+  height: 100%;
+  width: auto;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+@media screen and (max-width: 1157px) {
+  .carrousel {
+    flex-direction: row;
+    padding: 20px;
+    gap: 10px;
+  }
+
+  .carrousel img {
+    height: 40vh;
+    width: auto;
+    max-width: 60vw;
+  }
+}

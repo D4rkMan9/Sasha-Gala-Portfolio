@@ -35,8 +35,8 @@ header {
 
 .nav-links a {
   text-decoration: none;
-  font-weight: 500;
-  font-size: 16px;
+  font-weight: var(--nav-links-font-weight, 500);
+  font-size: var(--nav-links-font-size, 16px);
   position: relative;
   color: inherit;
   overflow: hidden;

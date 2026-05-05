@@ -28,7 +28,7 @@ export function Archive() {
     if (!imagesContainerRef.current || archiveImages.length === 0) return
 
     const container = imagesContainerRef.current
-    const isVertical = screenWidth <= 1157
+    const isMobile = screenWidth <= 1157
     let animationId = null
     let lastTime = Date.now()
 
@@ -36,7 +36,7 @@ export function Archive() {
     requestAnimationFrame(() => {
       const firstImg = container.querySelector('img')
       if (firstImg) {
-        const itemSize = isVertical ? firstImg.offsetHeight : firstImg.offsetWidth
+        const itemSize = isMobile ? firstImg.offsetWidth : firstImg.offsetHeight
         const offset = -(itemSize * 0.4)
         imagesTransform.current = offset
         targetImagesTransform.current = offset
@@ -59,7 +59,7 @@ export function Archive() {
 
       const firstImg = container.querySelector('img')
       if (firstImg) {
-        const itemSize = isVertical ? firstImg.offsetHeight : firstImg.offsetWidth
+        const itemSize = isMobile ? firstImg.offsetWidth : firstImg.offsetHeight
         const totalSize = itemSize * archiveImages.length
 
         if (imagesTransform.current <= -totalSize) {
@@ -72,10 +72,10 @@ export function Archive() {
         }
       }
 
-      if (isVertical) {
-        container.style.transform = `translateY(${imagesTransform.current}px)`
-      } else {
+      if (isMobile) {
         container.style.transform = `translateX(${imagesTransform.current}px)`
+      } else {
+        container.style.transform = `translateY(${imagesTransform.current}px)`
       }
 
       animationId = requestAnimationFrame(animate)
@@ -84,7 +84,7 @@ export function Archive() {
     const handleWheel = (e) => {
       e.preventDefault()
       userDraggingImages.current = true
-      const delta = isVertical ? e.deltaY : (e.deltaX || e.deltaY)
+      const delta = isMobile ? e.deltaX || e.deltaY : e.deltaY
       targetImagesTransform.current -= delta
       imagesTransform.current = targetImagesTransform.current;
 
