@@ -12,6 +12,10 @@ export function Home() {
   const [selected, setSelected] = useState(null)
   const [viewerImage, setViewerImage] = useState(null)
   const [siteLinks, setSiteLinks] = useState([])
+  const [scrollSpeeds, setScrollSpeeds] = useState({
+    projects: 30,
+    images: 50,
+  })
 
   const isHovering = useRef(false)
   const isOverSidebar = useRef(false)
@@ -93,6 +97,12 @@ export function Home() {
     siteConfigService.get()
       .then(data => {
         if (data.config?.config_data?.links) setSiteLinks(data.config.config_data.links)
+        if (data.config?.config_data) {
+          setScrollSpeeds({
+            projects: data.config.config_data.scroll_projects_speed || 30,
+            images: data.config.config_data.scroll_images_speed || 50,
+          })
+        }
       })
       .catch(() => {})
   }, [])
@@ -136,7 +146,7 @@ export function Home() {
       const pauseImages = userDraggingImages.current || viewerImageRef.current
 
       if (!pauseProjects) {
-        const speed = 30
+        const speed = scrollSpeeds.projects
         const movement = (speed * delta) / 1000
         projectsTransform.current -= movement
 
@@ -162,7 +172,7 @@ export function Home() {
       const imageSlotSize = imageItemSizeRef.current + 10
 
       if (!pauseImages) {
-        const speed = 30
+        const speed = scrollSpeeds.images
         const movement = (speed * delta) / 1000
         targetImagesTransform.current -= movement
         imagesTransform.current += (targetImagesTransform.current - imagesTransform.current) * 0.1
@@ -253,19 +263,21 @@ export function Home() {
 
     let lastProjectsTouch = 0
     const handleProjectsTouchStart = (e) => {
-      lastProjectsTouch = isMobile ? e.touches[0].clientX : e.touches[0].clientY
+      const isMobileNow = window.innerWidth <= 1157
+      lastProjectsTouch = isMobileNow ? e.touches[0].clientX : e.touches[0].clientY
       userDraggingProjects.current = true
     }
     const handleProjectsTouchMove = (e) => {
+      const isMobileNow = window.innerWidth <= 1157
       e.preventDefault()
       e.stopPropagation()
-      const currentPos = isMobile ? e.touches[0].clientX : e.touches[0].clientY
+      const currentPos = isMobileNow ? e.touches[0].clientX : e.touches[0].clientY
       const delta = currentPos - lastProjectsTouch
       lastProjectsTouch = currentPos
       projectsTransform.current += delta
 
-      const gap = isMobile ? 20 : 5
-      const marginLeft = isMobile ? 20 : 0
+      const gap = isMobileNow ? 20 : 5
+      const marginLeft = isMobileNow ? 20 : 0
       const slotSize = projectItemSizeRef.current + gap
       const totalSize = slotSize * projects.length * 3 + marginLeft
       if (totalSize > 0) {
@@ -273,7 +285,7 @@ export function Home() {
         if (projectsTransform.current > 0) projectsTransform.current -= totalSize
       }
 
-      if (isMobile) {
+      if (isMobileNow) {
         projectsContainer.style.transform = `translateX(${projectsTransform.current}px)`
       } else {
         projectsContainer.style.transform = `translateY(${projectsTransform.current}px)`

@@ -234,6 +234,7 @@ footer .contact-links{
   }
 
   .container {
+    height: fit-content;
     flex-direction: column;
     overflow: hidden;
   }
@@ -254,6 +255,7 @@ footer .contact-links{
     overflow: hidden;
     scrollbar-width: none;
     -ms-overflow-style: none;
+    touch-action: none;
   }
 
   .carrousel-y-wrapper::-webkit-scrollbar {
@@ -265,6 +267,7 @@ footer .contact-links{
     flex-direction: row;
     margin-left: 20px;
     padding: 10px 0;
+    touch-action: none;
   }
 
   .project-item {
@@ -282,20 +285,17 @@ footer .contact-links{
   }
 
   .containerwork {
-    height: 70%;
-    background-color: rgba(0, 0, 255, 0.288);
+    flex: 1;
     min-width: 0;
-  
     display: flex;
     justify-content: center;
     align-items: center;
   }
 
   .displaywork {
-    height: auto;
+    height: 50vh;
     width: 100%;
-    overflow-x: auto;
-    overflow-y: hidden;
+    overflow: hidden;
     padding: 20px;
     scrollbar-width: none;
     -ms-overflow-style: none;
@@ -319,8 +319,9 @@ footer .contact-links{
   }
 
   footer .contact-links {
+  
     padding-left: 20px;
     font-size: 14px;
-    width: 100%;
+    width: 78%;
   }
 }

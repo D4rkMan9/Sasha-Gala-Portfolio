@@ -386,6 +386,8 @@ function DesignTab() {
     nav_links_font_size: '16px',
     nav_links_font_weight: '500',
     footer_font_size: 'large',
+    scroll_projects_speed: 30,
+    scroll_images_speed: 50,
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -461,6 +463,28 @@ function DesignTab() {
         <div className="form-group">
           <label>TAMAÑO DE FOOTER</label>
           <input value={config.footer_font_size || ''} onChange={e => setConfig(prev => ({ ...prev, footer_font_size: e.target.value }))} placeholder="large" />
+        </div>
+
+        <h3 className="subsection-title">Velocidad de Scroll</h3>
+        <div className="form-group">
+          <label>VELOCIDAD DE PROYECTOS: {config.scroll_projects_speed || 30}</label>
+          <input
+            type="range"
+            min="10"
+            max="100"
+            value={config.scroll_projects_speed || 30}
+            onChange={e => setConfig(prev => ({ ...prev, scroll_projects_speed: parseInt(e.target.value) }))}
+          />
+        </div>
+        <div className="form-group">
+          <label>VELOCIDAD DE IMÁGENES: {config.scroll_images_speed || 50}</label>
+          <input
+            type="range"
+            min="10"
+            max="100"
+            value={config.scroll_images_speed || 50}
+            onChange={e => setConfig(prev => ({ ...prev, scroll_images_speed: parseInt(e.target.value) }))}
+          />
         </div>
       </div>
     </section>
