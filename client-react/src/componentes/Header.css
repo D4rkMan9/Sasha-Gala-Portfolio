@@ -1,0 +1,126 @@
+/* ============================================
+   HEADER & NAVIGATION
+   ============================================ */
+header {
+
+  padding: 50px;
+  width: 100%;
+  max-width: 100vw;
+  position: fixed;
+  top: 0;
+  left: 0;
+  margin: 0;
+  display: flex;
+  justify-content: space-between;
+  flex-direction: row;
+  box-sizing: border-box;
+  z-index: 1000;
+}
+
+.logo {
+  width: 50%;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.nav-links {
+  width: 50%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+    
+  top: 100%;
+}
+
+.nav-links a {
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 16px;
+  position: relative;
+  color: inherit;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  box-sizing: border-box;
+}
+
+.nav-links a:hover {
+  font-weight: bolder ;
+}
+
+a.header1:hover {
+  font-weight: inherit !important;
+  text-decoration: none !important;
+}
+
+
+.navbutton {
+  border: none;
+  background: none;
+  cursor: pointer;
+  padding: 0;
+  display: none;
+}
+
+
+/* Agrega esto ANTES de las media queries */
+
+a.header1 {
+  text-decoration: none !important;
+  color: inherit;
+  font-weight: inherit;
+}
+
+a.header1:hover {
+  font-weight: inherit !important;
+  text-decoration: none !important;
+}
+
+/* También asegúrate que el h1 no tenga efectos raros */
+.logo a {
+  text-decoration: none;
+}
+
+.logo h1 {
+  font-weight: normal; /* o el peso que quieras por defecto */
+}
+
+/* Mobile */
+@media screen and (max-width: 960px) {
+  header {
+    gap: 20px;
+    flex-direction: column;
+  }
+
+  .logo {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .nav-links {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    top: 50px;
+    opacity: 0;
+  }
+
+  .navbutton {
+    display: block;
+  }
+
+  #arrowdown-icon {
+    display: block;
+  }
+
+  
+}
+
+/* Desktop */
+@media screen and (min-width: 961px) {
+
+
+  .nav-links {
+    opacity: 1 !important;
+  }
+}

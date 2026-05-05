@@ -1,0 +1,27 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Build output
+client-react/dist/
+
+# Python
+server-flask/venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Environment
+.env
+server-flask/.env
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Backups (contain node_modules)
+backups/
+
+# IDE
+.vscode/
+.idea/

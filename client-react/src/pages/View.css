@@ -1,0 +1,190 @@
+/* ============================================
+   BIO SECTION
+   ============================================ */
+.view-body{
+  padding: 0 8% 0 8%;
+  padding-top: 120px;
+  min-height: 100vh;
+  width: 100%;
+}
+
+.view-section {
+
+  display: flex;
+  width: 100%;
+  min-height: 500px;
+  margin: 150px auto 0;
+  position: relative;
+  max-width: 95%;
+  flex-direction: column;
+  margin-bottom: 50px;
+}
+
+.view-top-half {  
+  
+  flex: 1; /* Takes up 50% of the height */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative; /* For positioning children like dibujito */
+}
+
+.view-bottom-half {
+
+  flex: 1; /* Takes up 50% of the height */
+  display: flex;
+  flex-direction: row; /* For horizontal split of its children */
+}
+
+.view-col-left {
+
+  flex: 1; /* Takes up 50% of the width */
+  display: flex;
+  justify-content: center;
+  align-items: top ;
+}
+
+.view-info{
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content:space-between;
+  gap: auto;
+  padding-right: 15%;
+
+}
+.project-title{
+  font-size: 45px;
+  font-weight: 550;
+  line-height: 1;
+}
+
+.colaborators{
+  font-size: 14px;
+  margin-top: 30px;
+}
+
+.view-titles {
+  display: flex;
+  flex-direction: column;
+}
+.view-titles h2 {
+  font-size: 16px;
+}
+
+
+
+.view-col-right {
+
+  flex: 1; /* Takes up 50% of the width */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: space-between;
+
+}
+
+.view-col-right p {
+  white-space: pre-wrap;
+}
+
+/* ============================================
+   GALLERY
+   ============================================ */
+.gallery {
+  --gap-galeria: 20px;
+  column-count: 4;
+  column-gap: var(--gap-galeria);
+  margin: 50px auto;
+  max-width: 95%;
+  width: 100%;
+}
+
+.layout-gallery {
+  width: 100%;
+  max-width: 95%;
+  margin: 50px auto;
+  padding: 0;
+}
+
+.layout-gallery > div {
+  width: 100%;
+  margin-bottom: 0;
+}
+
+.gallery-item {
+  break-inside: avoid;
+  margin-bottom: var(--gap-galeria);
+}
+
+.gallery-item.layout-slot {
+  margin-bottom: 0;
+}
+
+.layout-slot {
+  width: 100%;
+  border-radius: 2px;
+}
+
+.layout-slot-auto {
+  width: 100%;
+  border-radius: 2px;
+}
+
+.gallery-item img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+
+/* ============================================
+   MEDIA QUERIES
+   ============================================ */
+
+/* Mobile */
+@media screen and (max-width: 960px) {
+  .gallery {
+    --gap-galeria: 10px;
+    column-count: 2;
+    margin: 0 auto;
+  }
+
+  .view-section {
+    flex-direction: column;
+    align-items: flex-start;
+    margin-top: 150px;
+    height: auto;
+
+    
+  }
+
+  .view-bottom-half {
+    flex-direction: column;
+    width: 100%;
+    margin-bottom: 30px;
+  }
+
+  .view-col-left {
+    padding-bottom: 20px;
+  }
+
+
+  .view-info {
+    flex-direction: column;
+    padding-right: 0;
+    gap: 20px;
+  }
+
+  .project-title {
+    font-size: 32px; /* Smaller font for mobile */
+  }
+
+
+  #dibujito {
+    left: 50%;
+    top: 30%;
+    transform: translate(-50%, -50%);
+    max-width: 200px;
+  }
+}

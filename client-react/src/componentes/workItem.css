@@ -1,0 +1,133 @@
+/* ============================================
+   BIO SECTION
+   ============================================ */
+.work-item-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.main-container{
+  display: flex;
+  width: 100%;
+  min-height: 200px; /* Ensure it has a height to distribute */
+  margin: 80px auto 0;
+  position: relative;
+  max-width: 95%;
+  flex-direction: column; /* Changed to column for vertical split */
+}
+
+.top-half {
+
+  flex: 1; /* Takes up 50% of the height */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative; /* For positioning children like dibujito */
+}
+
+.bottom-half {
+  
+  flex: 1; /* Takes up 50% of the height */
+  display: flex;
+  flex-direction: row; /* For horizontal split of its children */
+}
+
+.bottom-left-quarter {
+  
+  flex: 1; /* Takes up 50% of the width */
+  display: flex;
+  justify-content: center;
+  align-items: top ;
+}
+
+.info{
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content:space-between;
+  gap: auto;
+  padding-right: 10%;
+
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+}
+.stack h2 {
+  font-size: 16px;
+}
+
+
+
+.bottom-right-quarter {
+
+  flex: 1; /* Takes up 50% of the width */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: space-between;
+  position: relative;
+
+}
+
+.bottom-right-quarter p {
+  white-space: pre-wrap; /* Preserve line breaks and spaces */
+
+}
+
+.project_topimage{
+  min-width: 100px;
+  max-width: 150px;
+  position: absolute;
+  right: 50%;
+  bottom: 30%;
+  opacity: 0;
+  transition: opacity 100ms ease-in-out;
+  
+}
+
+.main-container:hover .project_topimage{
+  opacity: 1;
+}
+
+/* Mobile */
+@media screen and (max-width: 960px) {
+
+  .main-container {
+    flex-direction: column;
+    align-items: flex-start;
+    margin-top: 150px;
+    height: auto;
+  }
+
+  .bottom-half {
+    flex-direction: column;
+    width: 100%;
+    gap: 30px;
+  }
+
+  .info {
+    flex-direction: column;
+
+    gap: 20px;
+  }
+
+  .projectTitle {
+    font-size: 32px; /* Smaller font for mobile */
+  }
+
+  .collabs{
+    margin-top: 10%;
+  }
+
+  
+  .project_topimage{
+
+    right: 0%;
+    bottom: 100%;
+
+    
+  }
+}

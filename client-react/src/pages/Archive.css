@@ -1,0 +1,9 @@
+.carrousel {
+  height: 100%;
+  width: fit-content;
+  display: flex;
+  gap: 10px;
+  flex-wrap: nowrap;
+  flex-shrink: 0;
+  padding: 3%;
+}

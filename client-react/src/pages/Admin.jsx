@@ -1,0 +1,373 @@
+import { useEffect, useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { projectService, archiveService, siteConfigService } from '../services/api';
+import './Admin.css';
+
+const TABS = ['Proyectos', 'Archivo', 'About'];
+
+export function Admin() {
+  const [activeTab, setActiveTab] = useState(0);
+  const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [newProject, setNewProject] = useState({
+    project_name: '', project_description: '', project_stack: '',
+    project_colaborators: '', project_type: 'full', status: 'draft',
+  });
+  const [openMenu, setOpenMenu] = useState(null);
+  const menuRefs = useRef({});
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem('adminToken');
+    const userData = localStorage.getItem('adminUser');
+    if (!token || !userData) { navigate('/login'); return; }
+    setUser(JSON.parse(userData));
+    fetchProjects();
+    const handleClickOutside = (e) => {
+      const anyOpen = Object.values(menuRefs.current).some(el => el && el.contains(e.target));
+      if (!anyOpen) setOpenMenu(null);
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [navigate]);
+
+  const fetchProjects = async () => {
+    try {
+      const data = await projectService.getAll();
+      if (data.projects) setProjects(data.projects);
+    } catch (error) {
+      if (error.message === 'Session expired') return;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('adminToken');
+    localStorage.removeItem('adminUser');
+    navigate('/login');
+  };
+
+  const handleDelete = async (id, name) => {
+    if (!window.confirm(`¿Estás seguro de que quieres borrar "${name}"?`)) return;
+    try {
+      await projectService.delete(id);
+      setProjects(prev => prev.filter(p => p.project_id !== id));
+    } catch (error) { alert('Error al borrar'); }
+  };
+
+  const handleArchiveProject = async (project) => {
+    const newStatus = project.status === 'archived' ? 'draft' : 'archived';
+    try {
+      await projectService.update(project.project_id, { ...project, status: newStatus });
+      setProjects(prev => prev.map(p =>
+        p.project_id === project.project_id ? { ...p, status: newStatus } : p
+      ));
+    } catch (error) { alert('Error al archivar'); }
+  };
+
+  const handleAddProject = async (e) => {
+    e.preventDefault();
+    try {
+      await projectService.add({ ...newProject, status: 'draft' });
+      setShowModal(false);
+      setNewProject({ project_name: '', project_description: '', project_stack: '', project_colaborators: '', project_type: 'full', status: 'draft' });
+      fetchProjects();
+    } catch (error) { alert('Error al crear'); }
+  };
+
+  const statusLabel = (s) => s === 'published' ? 'Publicado' : s === 'archived' ? 'Archivado' : 'Borrador';
+  const statusColor = (s) => s === 'published' ? { bg: '#e6f4ea', color: '#1e8e3e' } : s === 'archived' ? { bg: '#f3e8fd', color: '#7b1fa2' } : { bg: '#fff3e0', color: '#e65100' };
+
+  const published = projects.filter(p => p.status === 'published');
+  const drafts = projects.filter(p => p.status === 'draft');
+  const archived = projects.filter(p => p.status === 'archived');
+
+  if (loading) return <div style={{ padding: '100px', textAlign: 'center' }}>Cargando panel...</div>;
+
+  return (
+    <div className="admin-page">
+      <main className="admin-main">
+        <div className="admin-header-row">
+          <div>
+            <h1 className="admin-title">Panel de Control</h1>
+            <p className="admin-subtitle">Bienvenido, {user?.name}</p>
+          </div>
+          <button onClick={handleLogout} className="admin-logout">Cerrar Sesión</button>
+        </div>
+
+        <div className="admin-tabs">
+          {TABS.map((tab, i) => (
+            <button key={tab} className={`admin-tab ${activeTab === i ? 'admin-tab-active' : ''}`} onClick={() => setActiveTab(i)}>
+              {tab}
+            </button>
+          ))}
+        </div>
+
+        {activeTab === 0 && (
+          <ProjectsTab
+            published={published} drafts={drafts} archived={archived}
+            openMenu={openMenu} setOpenMenu={setOpenMenu} menuRefs={menuRefs}
+            navigate={navigate} handleDelete={handleDelete} handleArchive={handleArchiveProject}
+            showModal={showModal} setShowModal={setShowModal}
+            newProject={newProject} setNewProject={setNewProject} handleAddProject={handleAddProject}
+            statusLabel={statusLabel} statusColor={statusColor}
+          />
+        )}
+
+        {activeTab === 1 && <ArchiveTab />}
+        {activeTab === 2 && <AboutTab />}
+      </main>
+    </div>
+  );
+}
+
+/* ── PROJECTS TAB ── */
+function ProjectsTab({ published, drafts, archived, openMenu, setOpenMenu, menuRefs, navigate, handleDelete, handleArchive, showModal, setShowModal, newProject, setNewProject, handleAddProject, statusLabel, statusColor }) {
+  const renderTable = (title, list) => (
+    <div style={{ marginBottom: '30px' }}>
+      {title && <h3 className="subsection-title">{title}</h3>}
+      {list.length === 0 ? (
+        <p className="empty-msg">No hay proyectos</p>
+      ) : (
+        <table className="admin-table">
+          <thead>
+            <tr><th>Nombre</th><th>Tipo</th><th>Estado</th><th></th></tr>
+          </thead>
+          <tbody>
+            {list.map(project => {
+              const sc = statusColor(project.status);
+              const projectUrl = `/Work/${encodeURIComponent(project.project_name)}`;
+              return (
+                <tr key={project.project_id}>
+                  <td className="td-name">
+                    <a href={projectUrl} target="_blank" rel="noopener noreferrer" className="project-name-link">
+                      {project.project_name}
+                    </a>
+                  </td>
+                  <td className="td-type">{project.project_type === 'full' ? 'Completo' : 'Rápido'}</td>
+                  <td><span className="status-badge" style={{ backgroundColor: sc.bg, color: sc.color }}>{statusLabel(project.status)}</span></td>
+                  <td className="td-actions" ref={el => menuRefs.current[project.project_id] = el}>
+                    <button className="ellipsis-btn" onClick={() => setOpenMenu(openMenu === project.project_id ? null : project.project_id)}>⋮</button>
+                    {openMenu === project.project_id && (
+                      <div className="ellipsis-menu">
+                        <button onClick={() => { navigate(`/admin/edit/${project.project_id}`); setOpenMenu(null); }}>Editar</button>
+                        <a href={projectUrl} target="_blank" rel="noopener noreferrer" className="menu-link" onClick={() => setOpenMenu(null)}>Ver proyecto</a>
+                        <button onClick={() => { handleArchive(project); setOpenMenu(null); }}>
+                          {project.status === 'archived' ? 'Desarchivar' : 'Archivar'}
+                        </button>
+                        <button className="menu-danger" onClick={() => { handleDelete(project.project_id, project.project_name); setOpenMenu(null); }}>Borrar</button>
+                      </div>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      )}
+    </div>
+  );
+
+  return (
+    <>
+      <div className="admin-section-header">
+        <h2 className="admin-section-title">Proyectos</h2>
+        <button onClick={() => setShowModal(true)} className="btn-add-project">+ Nuevo Proyecto</button>
+      </div>
+
+      <section className="admin-section">
+        {renderTable('Publicados', published)}
+        {renderTable('Borradores', drafts)}
+        {renderTable('Archivados', archived)}
+      </section>
+
+      {showModal && (
+        <div className="modal-overlay" onClick={() => setShowModal(false)}>
+          <form className="modal-form" onSubmit={handleAddProject} onClick={e => e.stopPropagation()}>
+            <h2 className="modal-title">Nuevo Proyecto</h2>
+            <div className="form-group"><label>NOMBRE</label><input placeholder="Nombre del Proyecto" required value={newProject.project_name} onChange={e => setNewProject({ ...newProject, project_name: e.target.value })} /></div>
+            <div className="form-group"><label>TIPO</label><select value={newProject.project_type} onChange={e => setNewProject({ ...newProject, project_type: e.target.value })}><option value="full">Proyecto Completo</option><option value="quick">Proyecto Rápido</option></select></div>
+            <div className="form-group"><label>DESCRIPCIÓN</label><textarea placeholder="Descripción" rows="3" value={newProject.project_description} onChange={e => setNewProject({ ...newProject, project_description: e.target.value })} /></div>
+            <div className="form-group"><label>STACK</label><input placeholder="Photoshop, Illustrator..." value={newProject.project_stack} onChange={e => setNewProject({ ...newProject, project_stack: e.target.value })} /></div>
+            <div className="form-group"><label>COLABORADORES</label><input placeholder="Separados por coma" value={newProject.project_colaborators} onChange={e => setNewProject({ ...newProject, project_colaborators: e.target.value })} /></div>
+            <div className="modal-actions">
+              <button type="submit" className="btn-modal-primary">Crear como Borrador</button>
+              <button type="button" onClick={() => setShowModal(false)} className="btn-modal-cancel">Cancelar</button>
+            </div>
+          </form>
+        </div>
+      )}
+    </>
+  );
+}
+
+/* ── ARCHIVE TAB ── */
+function ArchiveTab() {
+  const [images, setImages] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const fileInputRef = useRef(null);
+  const gridRef = useRef(null);
+
+  useEffect(() => {
+    fetchArchive();
+  }, []);
+
+  const fetchArchive = async () => {
+    try {
+      const data = await archiveService.getAll();
+      setImages(data.images || []);
+    } catch (e) { console.error(e); }
+    finally { setLoading(false); }
+  };
+
+  const handleUpload = async (e) => {
+    const files = Array.from(e.target.files);
+    for (const file of files) {
+      const formData = new FormData();
+      formData.append('file', file);
+      try {
+        const res = await archiveService.upload(formData);
+        if (res.image) {
+          setImages(prev => [...prev, res.image]);
+        }
+      } catch (err) { console.error(err); }
+    }
+    e.target.value = '';
+  };
+
+  const handleDrop = async (e) => {
+    e.preventDefault();
+    e.currentTarget.classList.remove('archive-drop-active');
+    const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/'));
+    for (const file of files) {
+      const formData = new FormData();
+      formData.append('file', file);
+      try {
+        const res = await archiveService.upload(formData);
+        if (res.image) setImages(prev => [...prev, res.image]);
+      } catch (err) { console.error(err); }
+    }
+  };
+
+  const handleDelete = async (imgId) => {
+    try {
+      await archiveService.deleteImage(imgId);
+      setImages(prev => prev.filter(i => i.img_id !== imgId));
+    } catch (err) { console.error(err); }
+  };
+
+  const moveImage = (fromIdx, toIdx) => {
+    const updated = [...images];
+    const [moved] = updated.splice(fromIdx, 1);
+    updated.splice(toIdx, 0, moved);
+    setImages(updated);
+    const items = updated.map((img, i) => ({ img_id: img.img_id, order: i }));
+    archiveService.reorder(items).catch(console.error);
+  };
+
+  if (loading) return <p>Cargando archivo...</p>;
+
+  return (
+    <section className="admin-section">
+      <div className="admin-section-header">
+        <h2 className="admin-section-title">Archivo</h2>
+        <button onClick={() => fileInputRef.current.click()} className="btn-add-project">+ Añadir Fotos</button>
+      </div>
+      <input ref={fileInputRef} type="file" multiple accept="image/*" style={{ display: 'none' }} onChange={handleUpload} />
+
+      <div
+        ref={gridRef}
+        className="archive-grid"
+        onDragOver={(e) => { e.preventDefault(); e.currentTarget.classList.add('archive-drop-active'); }}
+        onDragLeave={(e) => e.currentTarget.classList.remove('archive-drop-active')}
+        onDrop={handleDrop}
+      >
+        <div className="archive-add-card" onClick={() => fileInputRef.current.click()}>
+          <span className="archive-add-icon">+</span>
+          <span>Añadir</span>
+        </div>
+        {images.map((img, idx) => (
+          <div key={img.img_id} className="archive-card" draggable onDragStart={(e) => e.dataTransfer.setData('text/plain', idx)} onDragOver={(e) => e.preventDefault()} onDrop={(e) => { e.preventDefault(); const from = parseInt(e.dataTransfer.getData('text/plain')); moveImage(from, idx); }}>
+            <img src={img.img_route} alt="" />
+            <button className="archive-remove" onClick={() => handleDelete(img.img_id)}>✕</button>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/* ── ABOUT TAB ── */
+function AboutTab() {
+  const [config, setConfig] = useState({ name: '', description: '', stack: '', links: [] });
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    siteConfigService.get()
+      .then(data => {
+        if (data.config?.config_data) setConfig(data.config.config_data);
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, []);
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      await siteConfigService.update(config);
+    } catch (err) { alert('Error al guardar'); }
+    finally { setSaving(false); }
+  };
+
+  const addLink = () => setConfig(prev => ({ ...prev, links: [...prev.links, { url: '', title: '' }] }));
+  const updateLink = (idx, field, value) => {
+    const links = [...config.links];
+    links[idx] = { ...links[idx], [field]: value };
+    setConfig(prev => ({ ...prev, links }));
+  };
+  const removeLink = (idx) => setConfig(prev => ({ ...prev, links: prev.links.filter((_, i) => i !== idx) }));
+
+  if (loading) return <p>Cargando...</p>;
+
+  return (
+    <section className="admin-section">
+      <div className="admin-section-header">
+        <h2 className="admin-section-title">About</h2>
+        <button onClick={handleSave} className="btn-add-project" disabled={saving}>{saving ? 'Guardando...' : 'Guardar'}</button>
+      </div>
+
+      <div className="about-form">
+        <div className="form-group">
+          <label>NOMBRE</label>
+          <input value={config.name || ''} onChange={e => setConfig(prev => ({ ...prev, name: e.target.value }))} />
+        </div>
+        <div className="form-group">
+          <label>DESCRIPCIÓN</label>
+          <textarea rows="5" value={config.description || ''} onChange={e => setConfig(prev => ({ ...prev, description: e.target.value }))} />
+        </div>
+        <div className="form-group">
+          <label>STACK</label>
+          <input value={config.stack || ''} onChange={e => setConfig(prev => ({ ...prev, stack: e.target.value }))} placeholder="Photoshop, Illustrator, Figma..." />
+        </div>
+
+        <div className="form-group">
+          <label>LINKS</label>
+          <div className="links-list">
+            {config.links.map((link, idx) => (
+              <div key={idx} className="link-row">
+                <input placeholder="Título" value={link.title || ''} onChange={e => updateLink(idx, 'title', e.target.value)} />
+                <input placeholder="URL" value={link.url || ''} onChange={e => updateLink(idx, 'url', e.target.value)} />
+                <button className="btn-remove" onClick={() => removeLink(idx)}>✕</button>
+              </div>
+            ))}
+            <button className="btn-add-link" onClick={addLink}>+ Añadir Link</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}

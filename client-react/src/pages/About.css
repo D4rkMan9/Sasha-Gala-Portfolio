@@ -1,0 +1,151 @@
+/* ============================================
+   PAGE WRAPPER
+   ============================================ */
+.about-page {
+  max-width: 95%;
+  margin: 0 auto;
+}
+
+/* ============================================
+   BIO SECTION
+   ============================================ */
+.bio-section {
+  display: flex;
+  flex-direction: column;
+  
+  margin-top: 25%;
+  justify-content: flex-end;
+}
+
+/* ============================================
+   COLUMNAS COMPARTIDAS
+   bio-section y contact-section usan la misma
+   grilla para mantener alineación perfecta
+   ============================================ */
+.bio-columns {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+}
+
+.bio-col-left {
+  flex: 1;
+  display: flex;
+  align-items: flex-start;
+  position: relative;
+}
+
+.bio-titles {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: right;
+  padding-right: 15%;
+}
+
+.bio-titles h2 {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.bio-col-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.bio-col-right p {
+  white-space: pre-wrap;
+  margin: 0;
+}
+
+/* ============================================
+   CONTACT SECTION
+   ============================================ */
+.contact-section {
+  margin-top: 80px;
+  margin-bottom: 80px;
+}
+
+.contact-links {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  padding-right: 15%;
+}
+
+.contact-links a {
+  text-decoration: none;
+  color: inherit;
+
+}
+
+.contact-links a:hover {
+  text-decoration: underline;
+}
+
+/* ============================================
+   DECORATIVE ELEMENTS
+   ============================================ */
+#dibujito {
+  position: absolute;
+  left: 25%;
+  bottom: 50%;
+  z-index: -10;
+  max-width: 100%;
+  max-height: 60vh;
+  object-fit: contain;
+}
+
+
+footer {
+  height: 10%;
+}
+
+/* ============================================
+   MEDIA QUERIES
+   ============================================ */
+@media screen and (max-width: 960px) {
+  .gallery {
+    --gap-galeria: 10px;
+    column-count: 2;
+    margin: 0 auto;
+  }
+
+  .bio-section {
+    margin-top: 150px;
+    min-height: auto;
+  }
+
+  .bio-columns {
+    flex-direction: column;
+    gap: 30px;
+  }
+
+  .bio-col-left {
+    padding-right: 0;
+    padding: 0 30px;
+  }
+
+  .bio-col-right {
+    padding: 0 30px 50px 30px;
+  }
+
+  .contact-section {
+    margin-top: 50px;
+  }
+
+  .contact-links {
+    padding-right: 0;
+  }
+
+  #dibujito {
+    left: 50%;
+    top: 30%;
+    transform: translate(-50%, -50%);
+    max-width: 200px;
+  }
+}
