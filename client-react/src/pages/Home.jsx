@@ -7,7 +7,7 @@ import { ImageViewer } from '../componentes/ImageViewer'
 import { ClickableImage } from '../componentes/ClickableImage'
 import { siteConfigService } from '../services/api'
 
-const REMOTE_IMG_BASE = 'https://sashagala.com.ar'
+const REMOTE_IMG_BASE = import.meta.env.VITE_IMG_BASE || 'https://sashagala.com.ar'
 
 const normalizeImageRoute = (route) => {
   if (!route) return route
@@ -95,6 +95,7 @@ export function Home() {
   const imageItemSizeRef = useRef(0)
 
   const selectedRef = useRef(selected)
+  const lastSelectedProjectRef = useRef(null)
   useEffect(() => { selectedRef.current = selected }, [selected])
 
   const screenWidth = useWindowWidth()
@@ -195,6 +196,14 @@ export function Home() {
       }
 
       const currentSelected = selectedRef.current
+
+      // Resetear transform cuando cambia el proyecto seleccionado
+      if (currentSelected !== lastSelectedProjectRef.current) {
+        lastSelectedProjectRef.current = currentSelected
+        imagesTransform.current = 0
+        targetImagesTransform.current = 0
+      }
+
       const filteredCount = projectimages.filter(img => img.project_id == currentSelected).length
       const imageSlotSize = imageItemSizeRef.current + 10
 

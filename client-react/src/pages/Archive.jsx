@@ -6,7 +6,7 @@ import { Header } from '../componentes/Header'
 import { ImageViewer } from '../componentes/ImageViewer'
 import { ClickableImage } from '../componentes/ClickableImage'
 
-const REMOTE_IMG_BASE = 'https://sashagala.com.ar'
+const REMOTE_IMG_BASE = import.meta.env.VITE_IMG_BASE || 'https://sashagala.com.ar'
 
 const normalizeImageRoute = (route) => {
   if (!route) return route

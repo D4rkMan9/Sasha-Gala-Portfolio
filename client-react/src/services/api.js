@@ -1,5 +1,5 @@
-const BASE_URL = '/api';
-const REMOTE_IMG_BASE = 'https://sashagala.com.ar';
+const BASE_URL = import.meta.env.VITE_API_URL || '/api';
+const REMOTE_IMG_BASE = import.meta.env.VITE_IMG_BASE || 'https://sashagala.com.ar';
 
 const normalizeImageRoute = (route) => {
   if (!route) return route;
