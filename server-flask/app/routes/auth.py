@@ -33,8 +33,12 @@ def token_required(f):
     return decorated
 
 
-@auth_bp.route('/google-login', methods=['POST'])
+@auth_bp.route('/google-login', methods=['POST', 'OPTIONS'])
 def google_login():
+    # Handle preflight request
+    if request.method == 'OPTIONS':
+        return '', 200
+
     data = request.get_json()
     token = data.get('token')
 
