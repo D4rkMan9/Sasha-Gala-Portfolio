@@ -3,13 +3,15 @@ import { useNavigate } from 'react-router-dom';
 import { Header } from '../componentes/Header';
 import './About.css'; // Podemos reusar estilos o crear Login.css
 
+const API_URL = import.meta.env.VITE_API_URL || '/api';
+
 export function Login() {
   const navigate = useNavigate();
 
   const handleSuccess = async (credentialResponse) => {
     try {
       // 1. Enviar el token de Google a nuestro Backend Flask
-      const response = await fetch('/api/auth/google-login', {
+      const response = await fetch(`${API_URL}/auth/google-login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
