@@ -33,6 +33,24 @@ def token_required(f):
     return decorated
 
 
+@auth_bp.route('/test', methods=['POST'])
+def test_endpoint():
+    data = request.get_json()
+    return jsonify({
+        'received': data,
+        'client_id': Config.GOOGLE_CLIENT_ID,
+        'allowed_admins': Config.ALLOWED_ADMINS
+    })
+
+@auth_bp.route('/test', methods=['POST'])
+def test_endpoint():
+    data = request.get_json()
+    return jsonify({
+        'received': data,
+        'client_id': Config.GOOGLE_CLIENT_ID,
+        'allowed_admins': Config.ALLOWED_ADMINS
+    })
+
 @auth_bp.route('/google-login', methods=['POST', 'OPTIONS'])
 def google_login():
     if request.method == 'OPTIONS':
