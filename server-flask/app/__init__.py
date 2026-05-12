@@ -16,6 +16,18 @@ def create_app():
     app.register_blueprint(api_bp, url_prefix='/api')
     app.register_blueprint(auth_bp, url_prefix='/api/auth')
 
+    # Debug: print registered routes
+    @app.route('/debug-routes')
+    def debug_routes():
+        routes = []
+        for rule in app.url_map.iter_rules():
+            routes.append({
+                'rule': str(rule),
+                'methods': list(rule.methods - {'HEAD', 'OPTIONS'}),
+                'endpoint': rule.endpoint
+            })
+        return jsonify({'routes': routes})
+
     # Serve uploaded project images
     @app.route('/imgs/<filename>')
     def serve_project_image(filename):
