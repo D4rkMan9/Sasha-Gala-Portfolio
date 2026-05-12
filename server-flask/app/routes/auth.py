@@ -43,6 +43,10 @@ def google_login():
 
     # Logging temporal
     print(f"Token recibido: {token[:20] if token else 'VACIO/NONE'}", flush=True)
+    print(f"GOOGLE_CLIENT_ID: {Config.GOOGLE_CLIENT_ID}", flush=True)
+
+    if not token:
+        return jsonify({'error': 'No token provided'}), 400
 
     try:
         idinfo = id_token.verify_oauth2_token(
@@ -82,3 +86,6 @@ def google_login():
     except ValueError as e:
         print(f"ValueError: {e}", flush=True)
         return jsonify({'error': 'Invalid Google token', 'detail': str(e)}), 400
+    except Exception as e:
+        print(f"Exception: {e}", flush=True)
+        return jsonify({'error': 'Server error', 'detail': str(e)}), 500

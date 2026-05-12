@@ -25,13 +25,14 @@ export function Login() {
         // 2. Guardar nuestro propio JWT y los datos del usuario
         localStorage.setItem('adminToken', data.token);
         localStorage.setItem('adminUser', JSON.stringify(data.user));
-        
+
         console.log('Login exitoso:', data.user.name);
-        
+
         // 3. Redirigir al panel de administración (que crearemos luego)
-        navigate('/admin'); 
+        navigate('/admin');
       } else {
-        alert(data.error || 'Error en el login');
+        console.error('Error del servidor:', data);
+        alert(`${data.error}${data.detail ? ': ' + data.detail : ''}`);
       }
     } catch (error) {
       console.error('Error conectando con el servidor:', error);
