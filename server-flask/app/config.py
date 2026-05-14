@@ -1,4 +1,5 @@
 import os
+import warnings
 from dotenv import load_dotenv
 
 # Load .env — try project root first (dev), then same dir as app/ (prod)
@@ -9,6 +10,9 @@ if not os.path.exists(_env_path):
     _env_path = os.path.join(_project_root, '.env')
 load_dotenv(_env_path)
 
+# Detect production (Docker container)
+_in_docker = os.path.exists('/.dockerenv')
+
 
 class Config:
     # Database
@@ -18,9 +22,16 @@ class Config:
     DB_PORT = int(os.getenv('DB_PORT', '3306'))
     DB_NAME = os.getenv('DB_NAME', 'testpy')
 
-    # Flask
-    SECRET_KEY = os.getenv('SECRET_KEY', 'dev_key_sasha_portfolio_2024')
-    DEBUG = os.getenv('DEBUG', 'True').lower() == 'true'
+    # Flask — fail loudly if SECRET_KEY missing in production
+    SECRET_KEY = os.getenv('SECRET_KEY')
+    if not SECRET_KEY:
+        if _in_docker:
+            warnings.warn("SECRET_KEY not set — using insecure default. Set it in your environment!", stacklevel=2)
+            SECRET_KEY = 'INSECURE-CHANGE-ME'
+        else:
+            SECRET_KEY = 'dev_key_sasha_portfolio_2024'
+
+    DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 
     # Google OAuth
     GOOGLE_CLIENT_ID = os.getenv('GOOGLE_CLIENT_ID', '')
@@ -33,8 +44,14 @@ class Config:
     _allowed_origins = os.getenv('ALLOWED_ORIGINS', 'http://localhost:5173,http://localhost:3000,https://sasha.aguilucho.ar')
     ALLOWED_ORIGINS = [o.strip() for o in _allowed_origins.split(',') if o.strip()]
 
-    # JWT
-    JWT_SECRET = os.getenv('JWT_SECRET', 'dev_jwt_key_change_in_production')
+    # JWT — fail loudly if JWT_SECRET missing in production
+    JWT_SECRET = os.getenv('JWT_SECRET')
+    if not JWT_SECRET:
+        if _in_docker:
+            warnings.warn("JWT_SECRET not set — using insecure default. Set it in your environment!", stacklevel=2)
+            JWT_SECRET = 'INSECURE-CHANGE-ME'
+        else:
+            JWT_SECRET = 'dev_jwt_key_change_in_production'
 
     # Base dir = directory where wsgi.py / app/ lives
     BASE_DIR = _server_dir
@@ -45,5 +62,8 @@ class Config:
     # Static folder for React build
     STATIC_FOLDER = os.getenv('DIST_FOLDER', os.path.join(PROJECT_ROOT, 'client-react', 'dist'))
 
-    # Upload folder for project images
-    UPLOAD_FOLDER = os.getenv('UPLOAD_FOLDER', os.path.join(PROJECT_ROOT, 'client-react', 'public', 'imgs'))
+    # Upload folder — always resolve to a safe default inside the container
+    UPLOAD_FOLDER = os.getenv('UPLOAD_FOLDER') or (
+        '/app/uploads' if _in_docker
+        else os.path.join(PROJECT_ROOT, 'client-react', 'public', 'imgs')
+    )
