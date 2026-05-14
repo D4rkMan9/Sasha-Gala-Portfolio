@@ -12,6 +12,7 @@ def init_db(app):
         "host": Config.DB_HOST,
         "port": Config.DB_PORT,
         "database": Config.DB_NAME,
+        "connect_timeout": 5,
     }
 
     try:
@@ -32,7 +33,6 @@ def get_db_connection():
             return db_pool.get_connection()
         except mysql.connector.Error as err:
             print(f"Error getting DB connection: {err}")
-            # Try to reinitialize pool
             try:
                 db_pool = mysql.connector.pooling.MySQLConnectionPool(
                     pool_name="mypool_retry",
@@ -40,14 +40,14 @@ def get_db_connection():
                     user=Config.DB_USER,
                     password=Config.DB_PASSWORD,
                     host=Config.DB_HOST,
+                    port=Config.DB_PORT,
                     database=Config.DB_NAME,
-            port=Config.DB_PORT,
+                    connect_timeout=5,
                 )
                 return db_pool.get_connection()
             except mysql.connector.Error as err2:
                 print(f"Error reinitializing DB pool: {err2}")
     else:
-        # Pool was never created, try once
         try:
             db_pool = mysql.connector.pooling.MySQLConnectionPool(
                 pool_name="mypool_init",
@@ -57,6 +57,7 @@ def get_db_connection():
                 host=Config.DB_HOST,
                 port=Config.DB_PORT,
                 database=Config.DB_NAME,
+                connect_timeout=5,
             )
             return db_pool.get_connection()
         except mysql.connector.Error as err:
