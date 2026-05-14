@@ -24,14 +24,15 @@ def init_db(app):
         "pool_size": 5,
     }
 
-    app.logger.info(f"Connecting to DB: {Config.DB_USER}@{Config.DB_HOST}:{Config.DB_PORT}/{db_name}")
+    print(f"[STARTUP] Connecting to DB: {Config.DB_USER}@{Config.DB_HOST}:{Config.DB_PORT}/{db_name}", flush=True)
 
     try:
         db_pool = mysql.connector.pooling.MySQLConnectionPool(**db_config)
-        app.logger.info("Database pool initialized successfully")
+        print("[STARTUP] Database pool initialized successfully", flush=True)
     except mysql.connector.Error as err:
-        app.logger.error(f"Error initializing database pool: {err}")
-        raise
+        print(f"[STARTUP] Error initializing database pool: {err}", flush=True)
+        # Don't raise — let the app start so /health can report db status
+        db_pool = None
 
 
 def get_db_connection():

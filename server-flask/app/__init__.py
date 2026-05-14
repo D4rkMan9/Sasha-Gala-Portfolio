@@ -6,14 +6,14 @@ from .database import init_db
 
 
 def create_app():
+    print(f"[STARTUP] Creating Flask app | IN_DOCKER={_in_docker} | DEBUG={Config.DEBUG}", flush=True)
+    print(f"[STARTUP] UPLOAD_FOLDER={Config.UPLOAD_FOLDER} | PROJECT_ROOT={Config.PROJECT_ROOT}", flush=True)
+
     app = Flask(__name__)
     app.config['SECRET_KEY'] = Config.SECRET_KEY
     CORS(app, resources={r"/*": {"origins": Config.ALLOWED_ORIGINS}})
 
-    try:
-        init_db(app)
-    except Exception as e:
-        app.logger.warning(f"Database not available at startup: {e}. App will start but DB queries will fail.")
+    init_db(app)
 
     from .routes.api import api_bp
     from .routes.auth import auth_bp
@@ -25,18 +25,6 @@ def create_app():
     def add_security_headers(response):
         response.headers['Cross-Origin-Opener-Policy'] = 'same-origin-allow-popups'
         return response
-
-    # Debug: print registered routes
-    @app.route('/debug-routes')
-    def debug_routes():
-        routes = []
-        for rule in app.url_map.iter_rules():
-            routes.append({
-                'rule': str(rule),
-                'methods': list(rule.methods - {'HEAD', 'OPTIONS'}),
-                'endpoint': rule.endpoint
-            })
-        return jsonify({'routes': routes})
 
     # Serve uploaded project images
     @app.route('/imgs/<filename>')
@@ -55,9 +43,13 @@ def create_app():
             'project_root': Config.PROJECT_ROOT,
             'in_docker': _in_docker,
             'debug': Config.DEBUG,
+            'db_host': Config.DB_HOST,
+            'db_name': Config.DB_NAME,
         })
 
+    print("[STARTUP] Flask app created successfully", flush=True)
     return app
+
 
 # Create app instance for gunicorn
 app = create_app()
