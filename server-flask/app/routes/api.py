@@ -39,6 +39,22 @@ def parse_layout_json(project):
         project['layout_json'] = {"sections": []}
 
 
+def extract_layout_urls(layout):
+    """Extract all image URLs from a layout_json structure."""
+    urls = set()
+    if not layout or not isinstance(layout, dict):
+        return urls
+    for section in layout.get('sections', []):
+        for row in section.get('rows', []):
+            for slot in row:
+                if not slot:
+                    continue
+                src = slot if isinstance(slot, str) else slot.get('src')
+                if src and (src.startswith('http://') or src.startswith('https://')):
+                    urls.add(src)
+    return urls
+
+
 def upload_to_cloudinary(file_bytes, public_id):
     """Upload image bytes to Cloudinary with auto format/quality."""
     result = cloudinary.uploader.upload(
@@ -143,9 +159,9 @@ def get_project_by_name(project_name):
 def get_project_images():
     images = execute_query(
         """SELECT i.* FROM images i
-        JOIN proyectos p ON i.project_id = p.project_id
-        WHERE i.status_id = 1 AND p.status = 'published'
-        ORDER BY i.project_id, i.display_order ASC"""
+           JOIN proyectos p ON i.project_id = p.project_id
+           WHERE i.status_id = 1 AND p.status = 'published'
+           ORDER BY i.project_id, i.display_order ASC"""
     )
     return jsonify({'images': images}) if images is not None else (jsonify({'error': 'DB Error'}), 500)
 
@@ -156,8 +172,8 @@ def get_project_images():
 def get_archive():
     images = execute_query(
         """SELECT * FROM images
-        WHERE status_id = 3
-        ORDER BY display_order ASC"""
+           WHERE status_id = 3
+           ORDER BY display_order ASC"""
     )
     return jsonify({'images': images or []})
 
@@ -297,17 +313,50 @@ def add_project():
 @token_required
 def update_project(project_id):
     data = request.get_json()
-    layout_str = json.dumps(data.get('layout_json', {"sections": []}))
+    new_layout = data.get('layout_json', {"sections": []})
+    layout_str = json.dumps(new_layout)
+
+    # Get current layout to find orphaned images
+    current = execute_query(
+        "SELECT layout_json FROM proyectos WHERE project_id = %s",
+        (project_id,), fetch_one=True
+    )
+    if current:
+        old_layout = current.get('layout_json', {})
+        if isinstance(old_layout, str):
+            try:
+                old_layout = json.loads(old_layout)
+            except json.JSONDecodeError:
+                old_layout = {"sections": []}
+        old_urls = extract_layout_urls(old_layout)
+    else:
+        old_urls = set()
+
+    new_urls = extract_layout_urls(new_layout)
+    removed_urls = old_urls - new_urls
+
+    # Delete orphaned images from DB and Cloudinary
+    if removed_urls:
+        for url in removed_urls:
+            img = execute_query(
+                "SELECT img_id, cloudinary_public_id FROM images WHERE img_route = %s AND project_id = %s",
+                (url, project_id), fetch_one=True
+            )
+            if img:
+                execute_query("DELETE FROM images WHERE img_id = %s", (img['img_id'],))
+                pid = img.get('cloudinary_public_id')
+                if pid:
+                    delete_from_cloudinary(pid)
 
     query = """
         UPDATE proyectos SET
-        project_name = %s,
-        project_description = %s,
-        project_stack = %s,
-        project_colaborators = %s,
-        project_type = %s,
-        status = %s,
-        layout_json = %s
+            project_name = %s,
+            project_description = %s,
+            project_stack = %s,
+            project_colaborators = %s,
+            project_type = %s,
+            status = %s,
+            layout_json = %s
         WHERE project_id = %s
     """
     params = (
