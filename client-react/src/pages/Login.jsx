@@ -1,5 +1,6 @@
 import { GoogleLogin } from '@react-oauth/google';
 import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import { Header } from '../componentes/Header';
 import './About.css'; // Podemos reusar estilos o crear Login.css
 
@@ -8,6 +9,12 @@ const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '360817230688-
 
 export function Login() {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (localStorage.getItem('adminToken')) {
+      navigate('/admin', { replace: true });
+    }
+  }, []);
 
   const handleSuccess = async (credentialResponse) => {
     try {
